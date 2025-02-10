@@ -12,16 +12,16 @@ class Player:
     
     def attack(self):
         return self.damage
-        
+
 class Enemy:
     def __init__(self, enemy_class, damage, health):
         self.enemy_class=enemy_class
         self.damage=damage
         self.health=health
         self.experience=2*self.health
-    
+
     def attack(self):
-        return self.damage
+        return self.damage    
 
 class RoomGenerator:
     def __init__(self):
@@ -30,3 +30,21 @@ class RoomGenerator:
 
     def get_room(self):
         return random.choices(self.room_types,self.weights)[0]
+    
+class ChestGenerator:
+    def __init__(self):
+        self.loot_types=["Health potion","Scroll","Nothing","Explotion"]
+        self.weights=[0.2,0.2,0.4,0.2]
+    
+    def get_loot(self):
+        return random.choices(self.loot_types,self.weights)[0]
+    #def open_chest(self):
+        #return self
+
+class StrategicRetreatGenerator:
+    def __init__(self):
+        self.action_types=["attack","flee"]
+        self.weights=[0.5,0.5]
+
+    def get_action(self):
+        return random.choices(self.action_types,self.weights)[0]
