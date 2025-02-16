@@ -2,13 +2,15 @@ import random
 
 
 class Player:
-    def __init__(self, name, player_class, damage):
+    def __init__(self, name, player_class, damage,level):
         self.name = name
         self.player_class = player_class
         self.health = 100
         self.experience = 0
         self.damage = damage
         self.coins = 10
+        self.level=level
+        self.kills=0
     
     def attack(self):
         return self.damage
@@ -26,7 +28,7 @@ class Enemy:
 
 class RoomGenerator:
     def __init__(self):
-        self.room_types=["Bedroom","Chest","Fight","Shop"]#Shop-Trashbin
+        self.room_types=["Bedroom","Chest","Fight","Shop"]
         self.weights=[0.1,0.2,0.6,0.1]
 
     def get_room(self):
@@ -39,8 +41,7 @@ class ChestGenerator:
     
     def get_loot(self):
         return random.choices(self.loot_types,self.weights)[0]
-    #def open_chest(self):
-        #return self
+
 
 #change name to HitOrMiss
 class StrategicRetreatGenerator:
