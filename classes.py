@@ -72,4 +72,18 @@ class StrategicRetreatGenerator:
         return random.choices(self.action_types,self.weights)[0]
 
 class Storyline:
-    def __init__(self):
+    def __init__(self,chapters):
+        self.chapters=chapters
+        self.current_chapter=0
+
+    def return_next_chapter(self):
+        current=self.current_chapter
+        self.current_chapter+=1
+        if current > len(self.chapters):
+            return "No more chapters."
+        return self.chapters[current]
+
+class Chapter:
+    def __init__(self,room_description,chapter_story):
+        self.room_description=room_description
+        self.chapter_story=chapter_story

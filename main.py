@@ -1,5 +1,6 @@
 import random, math
 from classes import Player, Enemy, RoomGenerator, ChestGenerator, StrategicRetreatGenerator, Boss
+from storyline import story
 
 
 if __name__ == "__main__":
@@ -160,6 +161,13 @@ if __name__ == "__main__":
                 else:
                     print("You didn't buy anything.")
             print(f"Player health: {p1.health} Player experience: {p1.experience} Player coins: {p1.coins}")
+            print("-------------------\n")
+
+        elif current_room=="Story":
+            print("----- Story -----")
+            chapter=story.return_next_chapter()
+            print(chapter.room_description)
+            print(chapter.chapter_story)
             print("-------------------\n")
 
         input("Press enter to continue...")
