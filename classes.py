@@ -27,7 +27,7 @@ class Player:
 class Enemy:
     def __init__(self, enemy_class):
         self.enemy_class=enemy_class
-        self.damage=random.randint(10, 20)
+        self.damage=random.randint(5, 15)
         self.health=random.randint(20,80)
         self.experience=0.5*self.health
         self.coins=random.randint(0, 3)
@@ -38,8 +38,8 @@ class Enemy:
 class Boss:
     def __init__(self, enemy_class):
         self.enemy_class=enemy_class
-        self.damage=random.randint(30, 60)
-        self.health=random.randint(60, 120)
+        self.damage=random.randint(20, 40)
+        self.health=random.randint(60, 100)
         self.experience=100
         self.coins=random.randint(10, 30)
 
