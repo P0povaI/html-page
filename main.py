@@ -20,6 +20,9 @@ if __name__ == "__main__":
     chest_generator = ChestGenerator()
     strategic_retreat_generator = StrategicRetreatGenerator()
     while True:
+        if p1.is_bleeding:
+            p1.health-=5
+            print("You are bleeding. You lose 5 hp. Buy a bandage to stop bleeding.")
         current_room=room_generator.get_room()
         current_chest=chest_generator.get_loot()
         current_action=strategic_retreat_generator.get_action()
@@ -106,12 +109,21 @@ if __name__ == "__main__":
             print("-------------------------------\n")
         elif current_room=="Fight":
             print("------------ Fight ------------\n")
+            #print("💀 You entered a room and there is an enemy that attacks you!\n")
+                #enemy=Enemy(enemy_class="Skeleton")
+            
             enemies = ["enemy", "boss"]
             chances = [0.8, 0.2]
             enemy_type = random.choices(enemies, chances)[0]
             if enemy_type == "enemy":
-                print("💀 You entered a room and there is an enemy that attacks you!\n")
-                enemy=Enemy(enemy_class="Skeleton")
+                enemy=Enemy()
+                enemy_class=enemy.enemy_class
+                if enemy_class=="mage":
+                    print("🧙🏻‍♀️ You entered a room and there is an enemy that attacks you!\n")
+                    
+                elif enemy_class=="fighter":
+                    print("🥷🏻 You entered a room and there is an enemy that attacks you!\n")
+                    
             else:
                 print("🐲 You entered a room and there is a giant, powerful enemy waiting for you!\n")
                 enemy=Boss(enemy_class="Dragon")
@@ -131,7 +143,9 @@ if __name__ == "__main__":
                     print(f"|- You deal: {player_damage} damage. Enemy health: {enemy.health}\n|")
                     if enemy.health>0:
                         print("|⚔️ The enemy attacks you!")
-                        enemy_damage=enemy.attack()
+                        enemy_damage, enemy_effect=enemy.attack()
+                        if enemy_effect:
+                            p1.apply_effect(enemy_effect)
                         p1.health-=enemy_damage
                         print(f"|- The enemy deals {enemy_damage} damage. Your health is {p1.health}\n|")
                         if p1.health<=0:
@@ -169,9 +183,11 @@ if __name__ == "__main__":
             if p1.coins<15:
                 print("You don't have enough money! You move to the next room.\n")
             else:
-                print("🤔 You can update your damage or health.")
+                print("🤔 You can update your damage or health. You can also buy the legendary Charm of Purity that grants the wearer the power to break free from any curse or The Hemostatic Bandage that quickly staunches bleeding, sealing wounds with its specially treated fabric. ")
                 print("- Type 'd' to update your damage")
                 print("- Type 'h' to update your health")
+                print("- Type 'c' to buy charm")
+                print("- Type 'b' to buy bandage")
                 print("- Type anything else to skip\n")
                 item=input("Enter your choice: ")
                 if item=="d":
@@ -182,6 +198,12 @@ if __name__ == "__main__":
                     p1.max_health+=2
                     p1.coins-=15
                     print(f"|🧡 You spent 15 coins and your maximum health increased to: {p1.max_health}\n")
+                elif item=="c":
+                    p1.coins-=30
+                    print(f"|🧿 You spent 30 coins and you broke free from the curse")
+                elif item=="b":
+                    p1.coins-=30
+                    print(f"|🩹 You spent 30 coins and you stopped the bleading")
                 else:
                     print("|💔 You didn't buy anything.\n|")
             print(f"🧡 Player health: {p1.health} 🧠 Player experience: {p1.experience} 💰 Player coins: {p1.coins}")

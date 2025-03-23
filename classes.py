@@ -12,8 +12,14 @@ class Player:
         self.coins = 10
         self.level=0
         self.kills=0
+        self.is_cursed=False
+        self.is_bleeding=False
     
     def attack(self):
+        if self.is_cursed:
+            print("You are cursed and you deal less damage.")
+            return self.damage*0.8
+        
         return self.damage
 
     def add_experience(self, exp):
@@ -24,16 +30,38 @@ class Player:
             self.damage+=5
             self.health+=10
 
+    def apply_effect(self,effect):
+        if effect=="curse":
+            self.is_cursed=True
+            print("The enemy cursed you!")
+
+        elif effect=="bleeding":
+            self.is_bleeding=True
+            print("The enemy made you bleed!")
+
+    def remove_effect(self,effect):
+        if effect=="curse":
+            self.is_cursed=False
+        elif effect=="bleeding":
+            self.is_bleeding=False
+
 class Enemy:
-    def __init__(self, enemy_class):
-        self.enemy_class=enemy_class
+    EFFECTS={"mage": "curse", "fighter": "bleeding"}
+    def __init__(self):
         self.damage=random.randint(5, 15)
         self.health=random.randint(20,80)
         self.experience=0.5*self.health
         self.coins=random.randint(0, 3)
+        self.enemy_classes_types=["mage", "fighter"]
+        self.chance_of_encounter=[0.5, 0.5]
+        self.enemy_class = random.choices(self.enemy_classes_types,self.chance_of_encounter)[0]
+
 
     def attack(self):
-        return self.damage
+        self.effect_type=[self.EFFECTS[self.enemy_class], None]
+        self.effect_chance=[0.5,0.5]
+        return self.damage, random.choices(self.effect_type,self.effect_chance)[0]
+
 
 class Boss:
     def __init__(self, enemy_class):
@@ -87,3 +115,16 @@ class Chapter:
     def __init__(self,room_description,chapter_story):
         self.room_description=room_description
         self.chapter_story=chapter_story
+
+class FinalBoss:
+    def __init__(self):
+        self.name="Xarathor, the Infinite Harbinger"
+        self.enemy_class="Final boss"
+        self.damage=50
+        self.health=150
+        self.experience=200
+        self.coins=100
+
+    def attack(self):
+        return self.damage
+        

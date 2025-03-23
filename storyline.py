@@ -1,4 +1,4 @@
-from classes import Storyline, Chapter
+from classes import Storyline, Chapter, FinalBoss
 
 
 chapter_one = Chapter(room_description="The air is thick with the scent of decay as you enter a vast, stone chamber. Cracked sarcophagi line the walls, and strange symbols are etched into the floor.", chapter_story="You’ve found your way into the crypt, an ancient burial site that was sealed long ago. The markings on the walls seem to pulse faintly as you walk, as if they are watching you. As you pass one of the sarcophagi, the lid shifts, and you hear the sound of something stirring inside. You must decide whether to investigate or avoid the ominous signs and continue through the dungeon.")
