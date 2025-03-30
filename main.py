@@ -1,5 +1,5 @@
 import random, math, time
-from classes import Player, Enemy, RoomGenerator, ChestGenerator, StrategicRetreatGenerator, Boss
+from classes import Player, Enemy, RoomGenerator, ChestGenerator, StrategicRetreatGenerator, Boss , FinalBoss
 from storyline import story
 
 
@@ -20,9 +20,39 @@ if __name__ == "__main__":
     chest_generator = ChestGenerator()
     strategic_retreat_generator = StrategicRetreatGenerator()
     while True:
+        if story.current_chapter>len(story.chapters):
+            enemy=FinalBoss()
+            while enemy.health>0:
+                time.sleep(1)
+                player_damage=p1.attack()
+                enemy.health-=player_damage
+                print("|⚔️ You attacked the enemy!")
+                print(f"|- You deal: {player_damage} damage. Enemy health: {enemy.health}\n|")
+                if enemy.health>0:
+                    print("|⚔️ The enemy attacks you!")
+                    enemy_damage, enemy_effect=enemy.attack()
+                    if enemy_effect:
+                        p1.apply_effect(enemy_effect)
+                    p1.health-=enemy_damage
+                    print(f"|- The enemy deals {enemy_damage} damage. Your health is {p1.health}\n|")
+                    if p1.health<=0:
+                        print("😵 You died!")
+                        print(f"🎓 Player level: {p1.level} 🗡️ Player kills: {p1.kills}")
+                        exit()
+                else:
+                    print("\nYou killed the enemy!\n")
+                    p1.add_experience(enemy.experience)
+                    if enemy.coins>0:
+                        p1.coins+=enemy.coins
+                        print(f"🪙 You received: {enemy.coins} coins\n")
+                    p1.kills+=1
         if p1.is_bleeding:
             p1.health-=5
             print("You are bleeding. You lose 5 hp. Buy a bandage to stop bleeding.")
+            if p1.health<=0:
+                print("😵 You died!")
+                print(f"🎓 Player level: {p1.level} 🗡️ Player kills: {p1.kills}")
+                exit()
         current_room=room_generator.get_room()
         current_chest=chest_generator.get_loot()
         current_action=strategic_retreat_generator.get_action()
@@ -199,11 +229,13 @@ if __name__ == "__main__":
                     p1.coins-=15
                     print(f"|🧡 You spent 15 coins and your maximum health increased to: {p1.max_health}\n")
                 elif item=="c":
-                    p1.coins-=30
+                    p1.coins-=2
                     print(f"|🧿 You spent 30 coins and you broke free from the curse")
+                    p1.remove_effect("curse")
                 elif item=="b":
-                    p1.coins-=30
+                    p1.coins-=2
                     print(f"|🩹 You spent 30 coins and you stopped the bleading")
+                    p1.remove_effect("bleeding")
                 else:
                     print("|💔 You didn't buy anything.\n|")
             print(f"🧡 Player health: {p1.health} 🧠 Player experience: {p1.experience} 💰 Player coins: {p1.coins}")
@@ -212,11 +244,13 @@ if __name__ == "__main__":
         elif current_room=="Story":
             print("------------ Story ------------\n")
             chapter=story.return_next_chapter()
-            print(chapter.room_description)
-            print("\n")
-            print(chapter.chapter_story)
-            print("\n")
-            print("-------------------------------\n")
-
+            try:
+                print(chapter.room_description)
+                print("\n")
+                print(chapter.chapter_story)
+                print("\n")
+                print("-------------------------------\n")
+            except:
+                print("No more chapters")
         input("Press enter to continue...\n")
 

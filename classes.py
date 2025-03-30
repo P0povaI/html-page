@@ -72,12 +72,12 @@ class Boss:
         self.coins=random.randint(10, 30)
 
     def attack(self):
-        return self.damage
+        return self.damage, None
 
 class RoomGenerator:
     def __init__(self):
         self.room_types=["Bedroom", "Chest", "Fight", "Shop", "Casino", "Story"]
-        self.weights=[0.1, 0.1, 0.5, 0.1, 0.1, 0.1]
+        self.weights=[0.1, 0.1, 0.1, 0.1, 0.1, 0.5]
 
     def get_room(self):
         return random.choices(self.room_types,self.weights)[0]
@@ -107,7 +107,7 @@ class Storyline:
     def return_next_chapter(self):
         current=self.current_chapter
         self.current_chapter+=1
-        if current > len(self.chapters):
+        if current > len(self.chapters)-1:
             return "No more chapters."
         return self.chapters[current]
 
@@ -117,6 +117,7 @@ class Chapter:
         self.chapter_story=chapter_story
 
 class FinalBoss:
+    EFFECTS={"mage": "curse", "fighter": "bleeding"}
     def __init__(self):
         self.name="Xarathor, the Infinite Harbinger"
         self.enemy_class="Final boss"
@@ -126,5 +127,5 @@ class FinalBoss:
         self.coins=100
 
     def attack(self):
-        return self.damage
+        return self.damage, "curse"
         
