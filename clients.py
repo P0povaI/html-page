@@ -21,8 +21,8 @@ def generate_story():
         messages=[{"role": "system", "content": rpg_system_prompt},
         {"role": "user", "content": "Generate a great engaging five chapter story."}
    ],
-    response_format=StoryModel()
+    response_format=StoryModel
 
     )
 
-    return response.choices[0].message.parsed
+    return response.choices[0].message.parsed.chapters

@@ -103,7 +103,7 @@ class Storyline:
     def __init__(self,chapters):
         self.chapters=chapters
         self.current_chapter=0
-        self.generate_storyline()
+        
 
     def return_next_chapter(self):
         current=self.current_chapter
@@ -112,8 +112,7 @@ class Storyline:
             return "No more chapters."
         return self.chapters[current]
     
-    def generate_storyline(self):
-        print(generate_story())
+    
 
 class Chapter:
     def __init__(self,room_description,chapter_story):
