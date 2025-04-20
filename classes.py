@@ -1,5 +1,5 @@
 import random
-
+from clients import generate_story
 
 class Player:
     def __init__(self, name, player_class, damage):
@@ -103,6 +103,7 @@ class Storyline:
     def __init__(self,chapters):
         self.chapters=chapters
         self.current_chapter=0
+        self.generate_storyline()
 
     def return_next_chapter(self):
         current=self.current_chapter
@@ -110,6 +111,9 @@ class Storyline:
         if current > len(self.chapters)-1:
             return "No more chapters."
         return self.chapters[current]
+    
+    def generate_storyline(self):
+        print(generate_story())
 
 class Chapter:
     def __init__(self,room_description,chapter_story):

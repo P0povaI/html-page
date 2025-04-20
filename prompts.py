@@ -1,0 +1,1 @@
+rpg_system_prompt="Generate dungeon rpg story in five chapters. Each chapter should start with a room description and include story progression. The chapter should be maximum five sentences long."
