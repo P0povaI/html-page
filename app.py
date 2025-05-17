@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from classes import Player, RoomGenerator
 
 class PlayerModel(BaseModel):
@@ -12,7 +13,11 @@ class PlayerModel(BaseModel):
 
 app = FastAPI()
 
-app.mount("/", StaticFiles(directory="static", html=True), name="static")
+app.mount("/static_assets", StaticFiles(directory="static", html=True), name="static_assets")
+
+@app.get("/", response_class=FileResponse)
+async def read_index():
+    return "static/index.html"
 
 @app.post("/game/start")
 def start_game(params: PlayerModel):
@@ -54,10 +59,6 @@ def game_completion():
 @app.post("/game/status")
 def game_status(): #player stats
     return ";_<"
-
-@app.post("/actions/fight/attack")
-def fight():
-    return 0
 
 @app.post("/actions/fight/attack")
 def fight():

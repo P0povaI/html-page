@@ -316,7 +316,7 @@
             // Image handling
             if (roomData.image) {
                 hideElement(roomImagePlaceholder);
-                roomImage.src = roomData.image; 
+                roomImage.src = '/static_assets/' + roomData.image; 
                 showElement(roomImage);
             } else {
                 showElement(roomImagePlaceholder);
