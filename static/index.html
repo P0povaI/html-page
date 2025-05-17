@@ -3,56 +3,493 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Text RPG Adventure</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-bg: #1a1a1a;
+            --secondary-bg: #2a2a2a;
+            --text-color: #e0e0e0;
+            --accent-color: #7b00ff; /* Purple from image */
+            --button-bg: #5a00b3;
+            --button-hover-bg: #4a0093;
+            --border-color: #444;
+            --font-family: 'Press Start 2P', cursive;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--secondary-bg); /* Changed to secondary-bg */
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 0; /* Removed body padding */
+            margin: 0; /* Ensure no default margin */
+            overflow-x: hidden;
+        }
+
+        .screen {
+            width: 100%;
+            max-width: 700px; /* Added max-width */
+            margin-left: auto;  /* Center .screen block */
+            margin-right: auto;
+            padding: 0 0 20px 0; 
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: var(--accent-color);
+            margin-bottom: 10px;
+        }
+
+        input[type="text"] {
+            font-family: var(--font-family);
+            padding: 10px;
+            background-color: var(--primary-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        button {
+            font-family: var(--font-family);
+            background-color: var(--button-bg);
+            color: var(--text-color);
+            border: none;
+            padding: 15px;
+            cursor: pointer;
+            text-transform: uppercase;
+            width: 100%;
+            transition: background-color 0.2s;
+            border-radius: 5px; /* Added border-radius */
+        }
+
+        button:hover {
+            background-color: var(--button-hover-bg);
+        }
+
+        /* Start Screen */
+        #start-screen {
+            align-items: center;
+            justify-content: center; 
+            height: 100vh; 
+            padding-top: 20px; /* Added top padding */
+            padding-left: 40px; /* Added horizontal padding */
+            padding-right: 40px; /* Added horizontal padding */
+            /* padding-bottom will be inherited from .screen (20px) */
+        }
+
+        /* Game Screen */
+        #game-screen {
+            height: 100vh; /* Full viewport height */
+            /* max-height: 800px; No longer needed if we want truly full screen */
+            justify-content: space-between;
+        }
+
+        #player-stats {
+            display: grid; /* Changed to grid */
+            /* grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); */ /* Responsive columns */
+            grid-template-columns: repeat(3, 1fr); /* Fixed 3 columns */
+            align-items: center;
+            padding: 12px 20px; /* Increased vertical padding */
+            background-color: var(--primary-bg);
+            border-bottom: 2px solid var(--border-color);
+            gap: 8px;
+            font-size: 0.7em;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            width: 100%; /* Ensure it takes full width of its container */
+        }
+        #player-stats span { 
+             min-width: auto; /* Remove fixed min-width, let grid handle it */
+             display: flex; 
+             align-items: center;
+             gap: 5px; 
+        }
+        #player-stats span.emoji {
+            font-size: 1.4em; 
+            line-height: 1; 
+        }
+
+        img#room-image { 
+            width: 100%; 
+            /* height: 250px; Removed fixed height */
+            object-fit: contain;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            display: block; 
+            background-color: var(--secondary-bg); 
+            margin-bottom: 10px; /* Add some margin below the image/placeholder */
+        }
+
+        p#room-image-placeholder {
+            width: 100%; 
+            min-height: 150px; /* Replaced fixed height with min-height */
+            display: flex; 
+            align-items: center;
+            justify-content: center;
+            background-color: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            color: #888;
+            font-size: 0.9em; 
+            margin-bottom: 10px; /* Add some margin below the image/placeholder */
+        }
+
+        #room-area {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: auto;
+            padding: 20px 20px 10px 20px; /* Top L/R Bottom - Added consistent padding */
+        }
+
+        #room-description, #story-content, #action-result { /* Updated selector */
+            line-height: 1.5; /* Slightly reduced line-height */
+            font-size: 0.9em; /* Reduce general paragraph font size */
+        }
+        
+        #action-result {
+            min-height: 60px;
+            padding: 10px 20px; 
+            background-color: var(--primary-bg);
+            border: 1px solid var(--border-color);
+            overflow-y: auto;
+            line-height: 1.5; 
+            font-size: 0.9em; 
+            margin: 10px 20px 0 20px; /* Added top margin, removed bottom for now */
+            /* Initially hidden, JS will show it */
+        }
+
+        #action-buttons-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 10px 20px 0 20px; /* Top L/R Bottom - Added L/R padding */
+            /* background-color: var(--secondary-bg); */ 
+        }
+        
+        #action-buttons button {
+            margin-bottom: 5px; /* If multiple buttons */
+        }
+        #action-buttons button:last-child {
+            margin-bottom: 0;
+        }
+
+
+        /* Responsive adjustments (optional for now, but good practice) */
+        @media (min-width: 600px) {
+            #player-stats {
+                font-size: 0.9em;
+            }
+        }
+
+    </style>
 </head>
 <body>
-    <header style="background-color: rgb(50, 50, 255); display:flex;">
-        <h3 style="color:rgb(230, 230, 39) ;">ФИЗИЧНИ ЯВЛЕНИЯ .  </h3>
-        <h3>ЗЕМЯТА И КОСМОСА</h3>
-    </header>
 
-    <br>
-    <section style="display: flex;">
-        <main style="padding-right: 14px;">
-            <section>
-                <h1 style="color: rgb(50, 50, 255); ">23. СЛЪНЦЕТО - НАШАТА ЗВЕЗДА</h1>
-                <p style="background-color: rgb(230, 230, 39); border-radius: 10px;">Lorem ipsum, dolor sit amet consectetur adipisicing elit. 
-                    Doloremque dicta error aut repellat, enim exercitationem quis assumenda aspernatur veritatis, 
-                    illo nesciunt! Ea exercitationem fugit minus. 
-                    Facilis consequatur inventore iure ipsam.
-                </p>
-            </section>
-            <section>
-            <h1 style="color: rgb(50, 50, 255); ">Lorem ipsum dolor sit amet consectetur adipisicing elit. </h1>
-            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. 
-                Dolorum non dolores similique eveniet corrupti illo enim facilis cum, 
-                vel consequatur veniam, aspernatur, deleniti incidunt nobis possimus 
-                vero voluptates libero saepe!
-            </p>
-            </section>
-            <section>
-                <h1 style="color: rgb(50, 50, 255); ">Lorem ipsum dolor sit amet consectetur adipisicing elit. </h1>
-                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. 
-                Dolorum non dolores similique eveniet corrupti illo enim facilis cum, 
-                vel consequatur veniam, aspernatur, deleniti incidunt nobis possimus 
-                vero voluptates libero saepe!
-                </p>
-            </section>
-        </main>
-        <aside style="border-left: 1px solid black; ">
-            <section>
-                <br>
-                <br>
-                <img style="height: 250px; width: 250px;" src="https://www.google.com/url?sa=i&url=http%3A%2F%2Ft2.gstatic.com%2Flicensed-image%3Fq%3Dtbn%3AANd9GcSC-tzajqpca4dchoeTCp8ChzFqdXnSnKtpkbx_5arltgIZQDdV4ALDa2ojaIHmI0GE&psig=AOvVaw0-zYEqGd9XQ7GJYYFIF6-w&ust=1737558563954000&source=images&cd=vfe&opi=89978449&ved=0CAwQjRxqFwoTCPj1p5mMh4sDFQAAAAAdAAAAABAE">
-                <p>Фиг.1. Слънцето - нашата</p>
-                <p>звезда</p>
-            </section>
-            <section>
-                <img style="height: 250px; width: 250px;" src="http://friendsoftherainbow.net/images/astro/solar.jpg">
-                <p>Фиг.2. Годишно движение</p>
-                <p>на Земята около Слънцето</p>
-            </section>
-        </aside>
-    </section>
+    <div id="start-screen" class="screen">
+        <h1>Welcome Adventurer!</h1>
+        <input type="text" id="player-name-input" placeholder="Enter your name (e.g., Veti)">
+        <button id="start-game-button">Start Adventure</button>
+    </div>
+
+    <div id="game-screen" class="screen hidden">
+        <div id="player-stats">
+            <span id="player-name"></span>
+            <span id="player-health"></span>
+            <span id="player-xp"></span>
+            <span id="player-level"></span>
+            <span id="player-coins"></span>
+            <span id="player-kills"></span>
+        </div>
+
+        <div id="room-area">
+            <img id="room-image" src="" alt="Room image" class="hidden">
+            <p id="room-image-placeholder">Room Image Area</p>
+            
+            <p id="room-description"></p>
+            <div id="story-content" class="hidden"></div>
+        </div>
+        
+        <div id="action-result"></div>
+
+        <div id="action-buttons-container">
+            <div id="action-buttons">
+                <!-- Action buttons will be dynamically added here -->
+            </div>
+            <button id="next-room-button" class="hidden">Next Room</button>
+        </div>
+    </div>
+
+    <div id="game-over-screen" class="screen hidden">
+        <h2>Game Over</h2>
+        <p>Details about your demise...</p>
+        <button id="restart-game-button">Restart Game</button>
+    </div>
+
+    <div id="game-complete-screen" class="screen hidden">
+        <h2>Congratulations!</h2>
+        <p>You have completed the adventure!</p>
+        <button id="play-again-button">Play Again</button>
+    </div>
+
+    <script>
+        // --- DOM Elements ---
+        const startScreen = document.getElementById('start-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const gameCompleteScreen = document.getElementById('game-complete-screen');
+
+        const playerNameInput = document.getElementById('player-name-input');
+        const startGameButton = document.getElementById('start-game-button');
+
+        const playerStatsName = document.getElementById('player-name');
+        const playerStatsHealth = document.getElementById('player-health');
+        const playerStatsXp = document.getElementById('player-xp');
+        const playerStatsLevel = document.getElementById('player-level');
+        const playerStatsCoins = document.getElementById('player-coins');
+        const playerStatsKills = document.getElementById('player-kills');
+
+        const roomImagePlaceholder = document.getElementById('room-image-placeholder');
+        const roomImage = document.getElementById('room-image');
+        const roomDescriptionElement = document.getElementById('room-description');
+        const storyContentElement = document.getElementById('story-content');
+        
+        const actionResultElement = document.getElementById('action-result');
+        const actionButtonsElement = document.getElementById('action-buttons');
+        const nextRoomButton = document.getElementById('next-room-button');
+
+        // --- Game State (Mock) ---
+        let currentPlayerState = {};
+        let currentRoomData = {};
+
+        // --- Utility Functions ---
+        function showElement(element) {
+            element.classList.remove('hidden');
+        }
+
+        function hideElement(element) {
+            element.classList.add('hidden');
+        }
+        
+        function clearElement(element) {
+            element.innerHTML = '';
+        }
+
+        // --- UI Update Functions ---
+        function updatePlayerStatsUI() {
+            if (!currentPlayerState) return;
+            // Adjusted to work with new emoji spans
+            playerStatsName.innerHTML = `<span class="emoji">👤</span> ${currentPlayerState.name}`;
+            playerStatsLevel.innerHTML = `<span class="emoji">🎓 </span>lvl ${currentPlayerState.level}`;
+            playerStatsXp.innerHTML = `<span class="emoji">🧠</span>${currentPlayerState.experience} xp`;
+            playerStatsHealth.innerHTML = `<span class="emoji">❤️ </span>${currentPlayerState.health}/${currentPlayerState.max_health}`;
+            playerStatsCoins.innerHTML = `<span class="emoji">💰 </span>${currentPlayerState.coins} coins`;
+            playerStatsKills.innerHTML = `<span class="emoji">💀 </span>${currentPlayerState.kills || 0} kills`;
+        }
+
+        function processRoomData(roomData, initialMessage = null) {
+            currentRoomData = roomData;
+
+            roomDescriptionElement.textContent = roomData.description;
+            
+            // Image handling
+            if (roomData.image) {
+                hideElement(roomImagePlaceholder);
+                roomImage.src = roomData.image; 
+                showElement(roomImage);
+            } else {
+                showElement(roomImagePlaceholder);
+                hideElement(roomImage);
+            }
+
+
+            if (roomData.story_content) {
+                storyContentElement.innerHTML = roomData.story_content;
+                showElement(storyContentElement);
+            } else {
+                hideElement(storyContentElement);
+            }
+
+            clearElement(actionButtonsElement);
+            hideElement(actionResultElement);
+            hideElement(nextRoomButton);
+
+            roomData.actions.forEach(action => {
+                const button = document.createElement('button');
+                button.textContent = action.text;
+                button.dataset.actionId = action.id;
+                button.addEventListener('click', () => handleActionButtonClick(action));
+                actionButtonsElement.appendChild(button);
+            });
+        }
+        
+        // --- Event Handlers & Game Logic (Mock) ---
+        function handleStartGame() {
+            const playerName = playerNameInput.value.trim() || "Veti";
+
+            console.log(`Starting game for player: ${playerName}`);
+
+            currentPlayerState = {
+                name: playerName,
+                player_class: "Mage", // Default class for now
+                health: 100,
+                max_health: 100,
+                experience: 0,
+                level: 1,
+                damage_base: 20,
+                coins: 10,
+                kills: 0,
+                is_bleeding: false,
+                active_effects: [],
+                inventory: []
+            };
+
+            const mockFirstRoom = { // This will be our Fight Room for now
+                type: "Fight",
+                name: "Enemy Ambush", // Name is hidden, but good for context
+                description: "A fierce Enemy eyes you menacingly from the shadows, clutching a rusty dagger!", // Changed Goblin to Enemy
+                image: "fighter.png", 
+                actions: [
+                    { id: "fight_engage", text: "⚔️ Attack Enemy" }, // Changed Goblin to Enemy
+                    { id: "fight_run", text: "🏃 Run Away" }
+                ],
+                enemy: {
+                    name: "Shadowy Enemy", // Changed Goblin Grunt to Shadowy Enemy
+                    health: 30,
+                    max_health: 30,
+                    damage_output_description: "3-7",
+                    image: "goblin_avatar.png" // This image is for enemy info, currently hidden
+                }
+            };
+            
+            hideElement(startScreen);
+            showElement(gameScreen);
+            
+            updatePlayerStatsUI();
+            processRoomData(mockFirstRoom);
+            hideElement(actionResultElement);
+        }
+
+        function handleActionButtonClick(action) {
+            console.log("Action button clicked:", action);
+            clearElement(actionResultElement);
+
+            if (action.id === "fight_engage") {
+                if (currentRoomData.enemy && currentRoomData.enemy.health > 0) {
+                    currentRoomData.enemy.health -= currentPlayerState.damage_base;
+                    let enemyDamage = Math.floor(Math.random() * 5) + 3;
+                    currentPlayerState.health -= enemyDamage;
+
+                    let resultText = `You attack the ${currentRoomData.enemy.name} for ${currentPlayerState.damage_base} damage.`; // Already generic
+                    if (currentRoomData.enemy.health <= 0) {
+                        currentRoomData.enemy.health = 0; 
+                        resultText += `\nThe ${currentRoomData.enemy.name} is defeated!`; // Already generic
+                        currentPlayerState.kills = (currentPlayerState.kills || 0) + 1;
+                        currentPlayerState.experience += 15;
+                        currentPlayerState.coins += 5;
+                        clearElement(actionButtonsElement);
+                        showElement(nextRoomButton);
+                    } else {
+                        resultText += `\nThe ${currentRoomData.enemy.name} has ${currentRoomData.enemy.health} HP remaining.`;
+                        resultText += `\nThe ${currentRoomData.enemy.name} retaliates, hitting you for ${enemyDamage} damage!`;
+                    }
+                    
+                    if (currentPlayerState.health <= 0) {
+                        currentPlayerState.health = 0;
+                        updatePlayerStatsUI();
+                        handleGameOver("You were slain by the " + currentRoomData.enemy.name + "!"); // Already generic
+                        return;
+                    }
+                    actionResultElement.innerHTML = resultText.replace(/\n/g, '<br>');
+                    showElement(actionResultElement);
+                }
+                 updatePlayerStatsUI();
+            } else if (action.id === "fight_run") {
+                actionResultElement.textContent = "You manage to escape, but the path ahead is uncertain.";
+                showElement(actionResultElement);
+                clearElement(actionButtonsElement);
+                showElement(nextRoomButton);
+            } else {
+                actionResultElement.textContent = `You chose to ${action.text.toLowerCase()}.`;
+                showElement(actionResultElement);
+                showElement(nextRoomButton);
+            }
+        }
+
+        function handleNextRoomButtonClick() {
+            console.log("Next Room button clicked");
+            hideElement(actionResultElement);
+            
+            const mockNextRoom = {
+                type: "Story", // Change room type for variety
+                name: "Quiet Clearing", // Name is hidden
+                description: "You find a moment of peace in a quiet clearing. What will you do?",
+                image: "fighter.png", // Also using fighter.png for now, or set to null/placeholder text
+                actions: [
+                    { id: "rest", text: "🏕️ Rest a while" },
+                    { id: "scout", text: "🌲 Scout Ahead" }
+                ],
+                enemy: null
+            };
+            processRoomData(mockNextRoom);
+            updatePlayerStatsUI();
+        }
+
+        function handleGameOver(message = "You have been defeated.") {
+            hideElement(gameScreen);
+            clearElement(actionButtonsElement);
+            hideElement(nextRoomButton);
+            const gameOverMessageElement = gameOverScreen.querySelector('p');
+            gameOverMessageElement.textContent = message + ` Final Stats - Level: ${currentPlayerState.level}, Kills: ${currentPlayerState.kills}, Coins: ${currentPlayerState.coins}.`;
+            showElement(gameOverScreen);
+        }
+        
+        // --- Initial Setup ---
+        function initApp() {
+            startGameButton.addEventListener('click', handleStartGame);
+            nextRoomButton.addEventListener('click', handleNextRoomButtonClick);
+            document.getElementById('restart-game-button').addEventListener('click', () => {
+                hideElement(gameOverScreen);
+                showElement(startScreen);
+                playerNameInput.value = '';
+                actionResultElement.textContent = "Action results will appear here...";
+            });
+            document.getElementById('play-again-button').addEventListener('click', () => {
+                hideElement(gameCompleteScreen);
+                showElement(startScreen);
+                playerNameInput.value = '';
+                actionResultElement.textContent = "Action results will appear here...";
+            });
+
+            hideElement(gameScreen);
+            hideElement(gameOverScreen);
+            hideElement(gameCompleteScreen);
+            showElement(startScreen);
+        }
+
+        document.addEventListener('DOMContentLoaded', initApp);
+
+    </script>
 </body>
 </html>
