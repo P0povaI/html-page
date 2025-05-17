@@ -78,9 +78,19 @@ class RoomGenerator:
     def __init__(self):
         self.room_types=["Bedroom", "Chest", "Fight", "Shop", "Casino", "Story"]
         self.weights=[0.1, 0.1, 0.1, 0.1, 0.1, 0.5]
+        self.descriptions={
+        "Bedroom": "🛌 You enter a hall resembling an underground inn.\n There is a strange man offering a bed for 5 coins.\n",
+        "Chest": "🤔 You entered a room and found a misterious chest. Do you want to open it?",
+        "Fight": "💀 You entered a room and there is an enemy that attacks you!\n",
+        "Shop": "🛠️ You came across a mysterious shop.\n",
+        "Casino": "🎰 You enter a gambling hall.",
+        "Story": ""
+    }
 
     def get_room(self):
-        return random.choices(self.room_types,self.weights)[0]
+        room_type = random.choices(self.room_types,self.weights)[0]
+        room_description=self.descriptions[room_type]
+        return room_type, room_description
     
 class ChestGenerator:
     def __init__(self):

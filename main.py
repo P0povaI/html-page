@@ -53,7 +53,7 @@ if __name__ == "__main__":
                 print("😵 You died!")
                 print(f"🎓 Player level: {p1.level} 🗡️ Player kills: {p1.kills}")
                 exit()
-        current_room=room_generator.get_room()
+        current_room, _ =room_generator.get_room()
         current_chest=chest_generator.get_loot()
         current_action=strategic_retreat_generator.get_action()
 

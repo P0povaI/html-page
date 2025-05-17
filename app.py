@@ -1,10 +1,11 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.staticfiles import StaticFiles
+from classes import Player, RoomGenerator
 
-
-class NameModel(BaseModel):
+class PlayerModel(BaseModel):
     name: str
+
 
 #class GameStatusModel(BaseModel):
 
@@ -14,8 +15,29 @@ app = FastAPI()
 app.mount("/", StaticFiles(directory="static", html=True), name="static")
 
 @app.post("/game/start")
-def start_game():
-    return "Start"
+def start_game(params: PlayerModel):
+    player = Player(params.name, player_class="Mage", damage=20)
+    room_generator = RoomGenerator()
+    room, description = room_generator.get_room()
+    return {
+        "player": {
+            "name": player.name,
+            "player_class": player.player_class,
+            "health": player.health,
+            "max_health": player.max_health,
+            "experience": player.experience,
+            "level": player.level,
+            "damage_base": player.damage,
+            "coins": player.coins,
+            "kills": player.kills,
+            "is_cursed": player.is_cursed,
+            "is_bleeding": player.is_bleeding
+        },
+        "room":{
+            "room_type": room,
+            "room_description": description
+        }
+        }
 
 @app.post("/game/next_room")
 def generate_room():
@@ -27,7 +49,7 @@ def final_boss_fight():
 
 @app.post("/game/complete")
 def game_completion():
-    return choose_appropariate_name()
+    return 0
 
 @app.post("/game/status")
 def game_status(): #player stats
