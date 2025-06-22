@@ -1,6 +1,11 @@
 import random
 from clients import generate_story
 
+
+def create_template_player():
+    player=Player(name="Player", player_class="Knight", damage=10)
+    return player
+
 class Player:
     def __init__(self, name, player_class, damage):
         self.name = name
@@ -14,7 +19,35 @@ class Player:
         self.kills=0
         self.is_cursed=False
         self.is_bleeding=False
-    
+
+    def update_from_existing_player(self, player):
+        self.name=player.name
+        self.player_class=player.player_class
+        self.max_health=player.max_health
+        self.health=player.health
+        self.experience=player.experience
+        self.damage=player.damage_base
+        self.coins=player.coins
+        self.level=player.level
+        self.kills=player.kills
+        self.is_cursed=player.is_cursed
+        self.is_bleeding=player.is_bleeding
+
+    def return_player_model_vars(self):
+        return {
+            "name": self.player_name,
+            "player_class": self.player_class,
+            "health": self.health,
+            "max_health": self.max_health,
+            "experience": self.experience,
+            "level": self.level,
+            "damage_base": int(self.damage_base),
+            "coins": int(self.coins),
+            "kills": int(self.kills),
+            "is_cursed": bool(self.is_cursed),
+            "is_bleeding": bool(self.is_bleeding)   
+        }
+
     def attack(self):
         if self.is_cursed:
             print("You are cursed and you deal less damage.")

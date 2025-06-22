@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from classes import Player, RoomGenerator, ChestGenerator, Enemy, Boss, StrategicRetreatGenerator
+from classes import Player, RoomGenerator, ChestGenerator, Enemy, Boss, StrategicRetreatGenerator, create_template_player
 from storyline import story
 import random
 
@@ -206,30 +206,36 @@ def bedroom_op():
 @app.post("/actions/fight/attack")
 def fight_attack(params: FightAttackModel):
     enemy=params.enemy
-    p1=Player(params.player.name, params.player.player_class, params.player.damage_base)
+    p1=create_template_player()
+    p1.update_from_existing_player(params.player)
+
     while enemy.health>0:
         player_damage=p1.attack()
         enemy.health-=player_damage
         fight_attack_result="|⚔️ You attacked the enemy!"
         fight_attack_result+=f"|- You deal: {player_damage} damage. Enemy health: {enemy.health}\n|"
         if enemy.health>0:
-            fight_attack_result="|⚔️ The enemy attacks you!"
+            fight_attack_result+="\n|⚔️ The enemy attacks you!"
             enemy_damage, enemy_effect=enemy.attack()
             if enemy_effect:
                 p1.apply_effect(enemy_effect)
             p1.health-=enemy_damage
-            fight_attack_result=f"|- The enemy deals {enemy_damage} damage. Your health is {p1.health}\n|"
+            fight_attack_result+=f"\n|- The enemy deals {enemy_damage} damage. Your health is {p1.health}\n|"
             if p1.health<=0:
-                fight_attack_result="😵 You died!"
-                fight_attack_result+=f"🎓 Player level: {p1.level} 🗡️ Player kills: {p1.kills}"
+                fight_attack_result+="\n😵 You died!"
+                fight_attack_result+=f"\n🎓 Player level: {p1.level} 🗡️ Player kills: {p1.kills}"
         else:
-            fight_attack_result="\nYou killed the enemy!\n"
+            fight_attack_result+="\nYou killed the enemy!\n"
             p1.add_experience(enemy.experience)
             if enemy.coins>0:
                 p1.coins+=enemy.coins
-                fight_attack_result=f"🪙 You received: {enemy.coins} coins\n"
+                fight_attack_result+=f"\n🪙 You received: {enemy.coins} coins\n"
             p1.kills+=1
-    return 0
+
+    return ActionResult(
+        player=PlayerModel(**p1.return_player_model_vars()), 
+        result=fight_attack_result
+    )
 
 @app.post("/actions/fight/run")
 def fight_run(params: FightRunModel):
@@ -257,7 +263,3 @@ def game_completion():
 @app.post("/game/status")
 def game_status(): #player stats
     return ";_<"
-
-@app.post("/actions/fight/attack")
-def fight():
-    return 0
