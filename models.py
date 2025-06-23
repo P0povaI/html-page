@@ -17,6 +17,7 @@ class PlayerModel(BaseModel):
     is_cursed: bool
     is_bleeding: bool
 
+
 class EnemyModel(BaseModel):
     enemy_class: str
     enemy_type: str
@@ -25,35 +26,44 @@ class EnemyModel(BaseModel):
     experience: float
     coins: int
 
+
 class CasinoModel(BaseModel):
     bet: int
     player: PlayerModel
+
 
 class MarketplaceModel(BaseModel):
     item: str
     player: PlayerModel
 
+
 class ChestModel(BaseModel):
     player: PlayerModel
 
+
 class BedroomModel(BaseModel):
     player: PlayerModel
+
 
 class FightAttackModel(BaseModel):
     player: PlayerModel
     enemy: EnemyModel
 
+
 class FightRunModel(BaseModel):
     player: PlayerModel
     enemy: EnemyModel
+
 
 class ActionResult(BaseModel):
     player: PlayerModel
     result: str
 
+
 class RoomModel(BaseModel):
     room_type: str
     room_description: str
+
 
 class GameStartModel(BaseModel):
     player: PlayerModel
