@@ -1,37 +1,28 @@
 import random
+
 from clients import generate_story
 
-
-def create_template_player():
-    player=Player(name="Player", player_class="Knight", damage=10)
-    return player
+def generate_enemy():
+    enemies = ["basic", "boss"]
+    chances = [0.8, 0.2]
+    enemy_type = random.choices(enemies, chances)[0]
+    enemy=Enemy(enemy_type)
+    return enemy
 
 class Player:
-    def __init__(self, name, player_class, damage):
+    def __init__(self, name, damage=20, max_health=100, health=100, 
+                 experience=0, coins=10, level=0, kills=0, is_cursed=False, 
+                 is_bleeding=False):
         self.name = name
-        self.player_class = player_class
-        self.max_health = 100
-        self.health = 100
-        self.experience = 0
+        self.max_health = max_health
+        self.health = health
+        self.experience = experience
         self.damage = damage
-        self.coins = 10
-        self.level=0
-        self.kills=0
-        self.is_cursed=False
-        self.is_bleeding=False
-
-    def update_from_existing_player(self, player):
-        self.name=player.name
-        self.player_class=player.player_class
-        self.max_health=player.max_health
-        self.health=player.health
-        self.experience=player.experience
-        self.damage=player.damage_base
-        self.coins=player.coins
-        self.level=player.level
-        self.kills=player.kills
-        self.is_cursed=player.is_cursed
-        self.is_bleeding=player.is_bleeding
+        self.coins = coins
+        self.level=level
+        self.kills=kills
+        self.is_cursed=is_cursed
+        self.is_bleeding=is_bleeding
 
     def return_player_model_vars(self):
         return {
@@ -80,20 +71,63 @@ class Player:
 
 class Enemy:
     EFFECTS={"mage": "curse", "fighter": "bleeding"}
-    def __init__(self):
-        self.damage=random.randint(5, 15)
-        self.health=random.randint(20,80)
-        self.experience=0.5*self.health
-        self.coins=random.randint(0, 3)
+    RANGES={
+        "boss":{
+            "damage":{
+                "min":20,
+                "max":40
+            },
+            "health":{
+                "min":60,
+                "max":100
+            },
+            "experience_multiplier":0.8,
+            "coins":{
+                "min":10,
+                "max":30
+            }
+        },
+        "basic":{
+            "damage":{
+                "min":5,
+                "max":15
+            },
+            "health":{
+                "min":20,
+                "max":50
+            },
+            "experience_multiplier":0.5,
+            "coins":{
+                "min":0,
+                "max":3
+            }
+        }   
+    }
+
+    def __init__(self, enemy_type="basic"):
+        self.enemy_type = enemy_type
+        self.damage=random.randint(self.RANGES[self.enemy_type]["damage"]["min"], self.RANGES[self.enemy_type]["damage"]["max"])
+        self.health=random.randint(self.RANGES[self.enemy_type]["health"]["min"], self.RANGES[self.enemy_type]["health"]["max"])
+        self.experience=self.health*self.RANGES[self.enemy_type]["experience_multiplier"]
+        self.coins=random.randint(self.RANGES[self.enemy_type]["coins"]["min"], self.RANGES[self.enemy_type]["coins"]["max"])
         self.enemy_classes_types=["mage", "fighter"]
         self.chance_of_encounter=[0.5, 0.5]
         self.enemy_class = random.choices(self.enemy_classes_types,self.chance_of_encounter)[0]
-
 
     def attack(self):
         self.effect_type=[self.EFFECTS[self.enemy_class], None]
         self.effect_chance=[0.5,0.5]
         return self.damage, random.choices(self.effect_type,self.effect_chance)[0]
+    
+    def return_enemy_model_vars(self):
+        return {
+            "enemy_class": self.enemy_class,
+            "enemy_type": self.enemy_type,
+            "damage": self.damage,
+            "health": self.health,
+            "experience": self.experience,
+            "coins": self.coins
+        }
 
 
 class Boss:

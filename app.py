@@ -1,68 +1,35 @@
+import random
 from fastapi import FastAPI
-from pydantic import BaseModel
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from classes import Player, RoomGenerator, ChestGenerator, Enemy, Boss, StrategicRetreatGenerator, create_template_player
 from storyline import story
-import random
-
-class PlayerStartModel(BaseModel):
-    name: str
-
-class PlayerModel(BaseModel):
-    name: str
-    player_class: str
-    health: int
-    max_health: int
-    experience: int
-    level: int
-    damage_base: int
-    coins: int
-    kills: int
-    is_cursed: bool
-    is_bleeding: bool
-
-class EnemyModel(BaseModel):
-    enemy_class: str
-    enemy_type: str
-    damage: int
-    health: int
-    experience: float
-    coins: int
-
-class CasinoModel(BaseModel):
-    bet: int
-    player: PlayerModel
-
-class MarketplaceModel(BaseModel):
-    item: str
-    player: PlayerModel
-
-class ChestModel(BaseModel):
-    player: PlayerModel
-
-class BedroomModel(BaseModel):
-    player: PlayerModel
-
-class FightAttackModel(BaseModel):
-    player: PlayerModel
-    enemy: EnemyModel
-
-class FightRunModel(BaseModel):
-    player: PlayerModel
-    enemy: EnemyModel
-
-class ActionResult(BaseModel):
-    player: PlayerModel
-    result: str
-
-#class GameStatusModel(BaseModel):
+from classes import (
+    Player, 
+    Enemy,
+    RoomGenerator, 
+    ChestGenerator, 
+    StrategicRetreatGenerator, 
+    generate_enemy
+)
+from models import (
+    PlayerStartModel, 
+    PlayerModel, 
+    RoomModel, 
+    EnemyModel, 
+    CasinoModel, 
+    MarketplaceModel, 
+    ChestModel, 
+    BedroomModel, 
+    FightAttackModel, 
+    FightRunModel, 
+    ActionResult,
+    GameStartModel
+)
 
 catalog_items={"bandage": 30, "charm": 30, "health_potion":15, "strength_potion": 15}
 bedroom_option={"sleep": 5}
 
 app = FastAPI()
-
 app.mount("/static_assets", StaticFiles(directory="static", html=True), name="static_assets")
 
 @app.get("/", response_class=FileResponse)
@@ -71,28 +38,13 @@ async def read_index():
 
 @app.post("/game/start")
 def start_game(params: PlayerStartModel):
-    player = Player(params.name, player_class="Mage", damage=20)
+    player = Player(params.name)
     room_generator = RoomGenerator()
     room, description = room_generator.get_room()
-    return {
-        "player": {
-            "name": player.name,
-            "player_class": player.player_class,
-            "health": player.health,
-            "max_health": player.max_health,
-            "experience": player.experience,
-            "level": player.level,
-            "damage_base": player.damage,
-            "coins": player.coins,
-            "kills": player.kills,
-            "is_cursed": player.is_cursed,
-            "is_bleeding": player.is_bleeding
-        },
-        "room":{
-            "room_type": room,
-            "room_description": description
-        }
-        }
+    return GameStartModel(
+        player=PlayerModel(**player.return_player_model_vars()), 
+        room=RoomModel(room_type=room, room_description=description)
+    )
 
 @app.get("/game/next_room")
 def generate_room():
@@ -101,31 +53,12 @@ def generate_room():
     if room == "Story":
         chapter=story.return_next_chapter()
         description=f"{chapter.room_description}\n{chapter.chapter_story}"
-    return {
-        "room":{
-            "room_type": room,
-            "room_description": description
-        }
-        }
+    return RoomModel(room_type=room, room_description=description)
 
-@app.get("/fight/enemy")
+@app.get("/enemy")
 def get_enemy():
-    enemies = ["enemy", "boss"]
-    chances = [0.8, 0.2]
-    enemy_type = random.choices(enemies, chances)[0]
-    if enemy_type == "enemy":
-        enemy=Enemy()
-        enemy_class=enemy.enemy_class
-        if enemy_class=="mage":
-            print("🧙🏻‍♀️ You entered a room and there is an enemy that attacks you!\n")
-            
-        elif enemy_class=="fighter":
-            print("🥷🏻 You entered a room and there is an enemy that attacks you!\n")
-            
-    else:
-        print("🐲 You entered a room and there is a giant, powerful enemy waiting for you!\n")
-        enemy=Boss(enemy_class="Dragon")
-    return EnemyModel(enemy_class=enemy.enemy_class, enemy_type=enemy_type, damage= enemy.damage, health= enemy.health, experience= enemy.experience, coins= enemy.coins)
+    enemy=generate_enemy()
+    return EnemyModel(**enemy.return_enemy_model_vars())
 
 @app.post("/actions/casino/bet")
 def casino(params: CasinoModel):
@@ -142,7 +75,6 @@ def casino(params: CasinoModel):
 
 @app.post("/actions/marketplace/purchase")
 def marketplace(params: MarketplaceModel):
-    
     price= catalog_items[params.item]
     if params.item=="strength_potion":
         params.player.damage_base+=2
@@ -168,16 +100,10 @@ def chest(params: ChestModel):
     chest_generator=ChestGenerator()
     outcome=chest_generator.get_loot()
     if outcome=="Health potion":
-        #last_health=params.player.health
-        #healed=params.player.health+20
-        #if params.player.health>=params.player.max_health:
-        #params.player.health=params.player.max_health
-        #chest_result=f"|🧪 You found a health potion. {abs(healed-last_health)} health added.\n"
         last_health = params.player.health
         params.player.health = min(params.player.health + 20, params.player.max_health)
         healed = params.player.health - last_health
         chest_result = f"|🧪 You found a health potion. {healed} health added.\n"
-
     elif outcome=="Scroll":
         params.player.experience+=20
         chest_result=f"|📖 You found a scroll. 20 exp added.\n"
@@ -205,9 +131,8 @@ def bedroom_op():
 
 @app.post("/actions/fight/attack")
 def fight_attack(params: FightAttackModel):
-    enemy=params.enemy
-    p1=create_template_player()
-    p1.update_from_existing_player(params.player)
+    enemy=Enemy(**params.enemy.model_dump())
+    p1=Player(**params.player.model_dump())
 
     while enemy.health>0:
         player_damage=p1.attack()
