@@ -11,6 +11,12 @@ def generate_enemy():
     return enemy
 
 
+def create_from_existing_enemy(enemy_model):
+    enemy = Enemy()
+    enemy.overwrite_enemy_attributes(**enemy_model.model_dump())
+    return enemy
+
+
 class Player:
     def __init__(
         self,
@@ -126,6 +132,23 @@ class Enemy:
         self.effect_type = [self.EFFECTS[self.enemy_class], None]
         self.effect_chance = [0.5, 0.5]
         return self.damage, random.choices(self.effect_type, self.effect_chance)[0]
+    
+    def overwrite_enemy_attributes(
+            self,
+            enemy_class,
+            enemy_type,
+            damage,
+            health,
+            experience,
+            coins,
+    ):
+        self.enemy_class = enemy_class
+        self.enemy_type = enemy_type
+        self.damage = damage
+        self.health = health
+        self.experience = experience
+        self.coins = coins
+        return self.return_enemy_model_vars()
 
     def return_enemy_model_vars(self):
         return {

@@ -10,6 +10,7 @@ from classes import (
     ChestGenerator,
     StrategicRetreatGenerator,
     generate_enemy,
+    create_from_existing_enemy
 )
 from models import (
     PlayerStartModel,
@@ -59,12 +60,6 @@ def generate_room():
         chapter = story.return_next_chapter()
         description = f"{chapter.room_description}\n{chapter.chapter_story}"
     return RoomModel(room_type=room, room_description=description)
-
-
-@app.get("/enemy")
-def get_enemy():
-    enemy = generate_enemy()
-    return EnemyModel(**enemy.return_enemy_model_vars())
 
 
 @app.post("/actions/casino/bet")
@@ -142,9 +137,15 @@ def bedroom_op():
     return bedroom_option
 
 
+@app.get("/enemy")
+def get_enemy():
+    enemy = generate_enemy()
+    return EnemyModel(**enemy.return_enemy_model_vars())
+
+
 @app.post("/actions/fight/attack")
 def fight_attack(params: FightAttackModel):
-    enemy = Enemy(**params.enemy.model_dump())
+    enemy = create_from_existing_enemy(params.enemy)
     p1 = Player(**params.player.model_dump())
 
     while enemy.health > 0:
