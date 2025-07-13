@@ -11,7 +11,7 @@ class PlayerModel(BaseModel):
     max_health: int
     experience: int
     level: int
-    damage_base: int
+    damage: int
     coins: int
     kills: int
     is_cursed: bool
@@ -19,7 +19,9 @@ class PlayerModel(BaseModel):
 
 
 class EnemyModel(BaseModel):
+    enemy_class: str
     enemy_type: str
+    damage: int
     health: int
     experience: float
     coins: int

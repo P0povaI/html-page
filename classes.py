@@ -44,13 +44,12 @@ class Player:
 
     def return_player_model_vars(self):
         return {
-            "name": self.player_name,
-            "player_class": self.player_class,
+            "name": self.name,
             "health": self.health,
             "max_health": self.max_health,
             "experience": self.experience,
             "level": self.level,
-            "damage_base": int(self.damage_base),
+            "damage": int(self.damage),
             "coins": int(self.coins),
             "kills": int(self.kills),
             "is_cursed": bool(self.is_cursed),
