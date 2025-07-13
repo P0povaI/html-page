@@ -19,9 +19,7 @@ class PlayerModel(BaseModel):
 
 
 class EnemyModel(BaseModel):
-    enemy_class: str
     enemy_type: str
-    damage: int
     health: int
     experience: float
     coins: int
