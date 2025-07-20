@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const gameScreen = document.getElementById('game-screen');
     const gameOverScreen = document.getElementById('game-over-screen');
     const gameCompleteScreen = document.getElementById('game-complete-screen');
+    const loadingIndicator = document.getElementById('loading-indicator');
 
     const playerNameInput = document.getElementById('player-name-input');
     const startGameButton = document.getElementById('start-game-button');
@@ -16,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Player Stats
     const playerNameDisplay = document.getElementById('player-name');
     const playerHealthDisplay = document.getElementById('player-health');
+    const playerDamageDisplay = document.getElementById('player-damage');
     const playerXpDisplay = document.getElementById('player-xp');
     const playerLevelDisplay = document.getElementById('player-level');
     const playerCoinsDisplay = document.getElementById('player-coins');
@@ -58,6 +60,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
+            // Show loading indicator and generate new story
+            showElement(loadingIndicator);
+            startGameButton.disabled = true;
+
+            const storyResponse = await fetch('/game/new_story');
+            if (!storyResponse.ok) {
+                throw new Error('Failed to generate a new story.');
+            }
+
+            // Once the story is generated, proceed to start the game
             const response = await fetch('/game/start', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -80,7 +92,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (error) {
             console.error("Error starting game:", error);
-            alert("Failed to start the game. Is the server running? Please check the console for errors.");
+            alert(`Failed to start the game. Is the server running? Please check the console for errors. Details: ${error.message}`);
+        } finally {
+            // Always hide the loading indicator and re-enable the button
+            hideElement(loadingIndicator);
+            startGameButton.disabled = false;
         }
     }
 
@@ -89,7 +105,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         playerNameDisplay.innerHTML = `<span class="emoji">👤</span> ${currentPlayerState.name}`;
         playerHealthDisplay.innerHTML = `<span class="emoji">🧡</span> ${currentPlayerState.health}/${currentPlayerState.max_health}`;
-        playerXpDisplay.innerHTML = `<span class="emoji">🧠</span> ${currentPlayerState.experience}`;
+        playerDamageDisplay.innerHTML = `<span class="emoji">🗡️</span> ${currentPlayerState.damage} Dmg`;
+        playerXpDisplay.innerHTML = `<span class="emoji">🧠</span> ${currentPlayerState.experience} XP`;
         playerLevelDisplay.innerHTML = `<span class="emoji">🎓</span> Level ${currentPlayerState.level}`;
         playerCoinsDisplay.innerHTML = `<span class="emoji">💰</span> ${currentPlayerState.coins} Coins`;
         playerKillsDisplay.innerHTML = `<span class="emoji">💀</span> ${currentPlayerState.kills} Kills`;
@@ -130,11 +147,11 @@ document.addEventListener('DOMContentLoaded', () => {
             case "Story":
                 hideElement(roomImage);
                 hideElement(roomImagePlaceholder);
-                // For story rooms, display the narrative in the main action result area for prominence.
                 roomDescriptionDisplay.textContent = "A new chapter of your story unfolds...";
-                actionResultDisplay.innerHTML = roomData.room_description.replace(/\n/g, '<br>');
-                showElement(actionResultDisplay); // Make sure it's visible
-                showElement(nextRoomButton); // Story rooms just lead to the next room
+                // Display story word by word
+                displayTextWordByWord(roomData.room_description, () => {
+                    showElement(nextRoomButton); // Show button AFTER story is displayed
+                });
                 break;
             case "Fight":
                 try {
@@ -327,6 +344,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function displayTextWordByWord(text, onComplete = () => {}) {
+        const words = text.split(/\s+/); // Split by any whitespace
+        actionResultDisplay.innerHTML = ''; // Clear for new story
+        showElement(actionResultDisplay);
+        
+        let i = 0;
+        function showNextWord() {
+            if (i < words.length) {
+                actionResultDisplay.innerHTML += words[i] + ' ';
+                actionResultDisplay.scrollTop = actionResultDisplay.scrollHeight;
+                i++;
+                setTimeout(showNextWord, 200); // 200ms delay for a word-by-word pace
+            } else {
+                onComplete(); // All words displayed, call the completion callback
+            }
+        }
+        showNextWord();
+    }
+
     function createButton(text, onClick) {
         const button = document.createElement('button');
         button.textContent = text;
@@ -394,15 +430,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function handleNextRoom() {
         try {
-            const response = await fetch('/game/next_room');
+            const response = await fetch('/game/next_room', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ player: currentPlayerState })
+            });
+
             if (!response.ok) {
                 throw new Error("Failed to fetch the next room.");
             }
-            const roomData = await response.json();
-            processRoomData(roomData);
+            const data = await response.json();
+
+            currentPlayerState = data.player;
+            updatePlayerStatsUI(); // Update UI with potentially new health from bleeding
+            
+            if (data.message) {
+                // Briefly show the bleeding message before loading the next room's content
+                actionResultDisplay.innerHTML = data.message.replace(/\n/g, '<br>');
+                showElement(actionResultDisplay);
+                await delay(1500); // Pause to let the user read the message
+            }
+
+            // After the potential delay, process the new room
+            processRoomData(data.room);
+
         } catch(error) {
             console.error("Error fetching next room:", error);
             actionResultDisplay.textContent = "The path forward is blocked. Try again.";
+            showElement(actionResultDisplay);
         }
     }
     
@@ -421,12 +476,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Event Listeners ---
     const restartGameButton = document.getElementById('restart-game-button');
+    const toggleStatsButton = document.getElementById('toggle-stats-button');
 
     startGameButton.addEventListener('click', initGame);
     nextRoomButton.addEventListener('click', handleNextRoom);
     restartGameButton.addEventListener('click', () => {
         // Simple reload to restart the game from scratch
         window.location.reload();
+    });
+
+    toggleStatsButton.addEventListener('click', () => {
+        const secondaryStats = document.getElementById('secondary-stats');
+        const isHidden = secondaryStats.classList.toggle('hidden');
+        toggleStatsButton.textContent = isHidden ? '🔽' : '🔼';
     });
 
     // Optional: Allow pressing Enter to start the game

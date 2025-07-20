@@ -104,21 +104,52 @@
         }
 
         #player-stats {
-            display: grid; /* Changed to grid */
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); /* Use responsive columns */
-            align-items: center;
-            padding: 12px 20px; /* Increased vertical padding */
             background-color: var(--primary-bg);
             border-bottom: 2px solid var(--border-color);
-            gap: 8px;
-            font-size: 0.7em;
+            padding: 8px 20px;
             position: sticky;
             top: 0;
             z-index: 10;
-            width: 100%; /* Ensure it takes full width of its container */
+            width: 100%;
         }
+
+        #primary-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .stat-group {
+            display: flex;
+            align-items: center;
+            gap: 15px; /* Space between items in a group */
+        }
+        
+        #secondary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 8px; /* Gap between the secondary stats */
+            padding-top: 10px; /* Space from the primary row */
+            border-top: 1px solid var(--border-color);
+            margin-top: 8px;
+        }
+
+        #toggle-stats-button {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            cursor: pointer;
+            padding: 5px;
+            font-size: 1.2em;
+        }
+
+        #toggle-stats-button:hover {
+            background-color: var(--secondary-bg);
+        }
+
         #player-stats span { 
-             min-width: auto; /* Remove fixed min-width, let grid handle it */
+             min-width: auto; 
              display: flex; 
              align-items: center;
              gap: 5px; 
@@ -130,28 +161,37 @@
         }
 
         img#room-image { 
-            width: 100%; 
-            /* height: 250px; Removed fixed height */
+            display: block;
+            width: 100%;
+            max-height: 350px; /* Constrain vertical size on large screens */
             object-fit: contain;
             border: 1px solid var(--border-color);
-            border-radius: 5px;
-            display: block; 
-            background-color: var(--secondary-bg); 
-            margin-bottom: 10px; /* Add some margin below the image/placeholder */
+            border-radius: 10px; /* More rounded corners */
+            background-color: #111; /* Darker bg for better contrast */
+            margin-bottom: 10px;
         }
 
         p#room-image-placeholder {
             width: 100%; 
-            min-height: 150px; /* Replaced fixed height with min-height */
+            height: 350px; /* Match the image's max-height for consistency */
             display: flex; 
             align-items: center;
             justify-content: center;
             background-color: var(--secondary-bg);
             border: 1px solid var(--border-color);
-            border-radius: 5px;
+            border-radius: 10px; /* Match the image's rounding */
             color: #888;
             font-size: 0.9em; 
             margin-bottom: 10px; /* Add some margin below the image/placeholder */
+        }
+
+        #text-content-wrapper {
+            /* This wrapper no longer needs padding; children will handle it. */
+        }
+
+        #room-description {
+            padding: 0 15px; /* Match horizontal padding of the action box for alignment */
+            margin-bottom: 10px; /* Add space between description and action box */
         }
 
         #room-area {
@@ -170,14 +210,14 @@
         
         #action-result {
             min-height: 60px;
-            padding: 10px 20px; 
+            padding: 15px; /* Increased padding */
             background-color: var(--primary-bg);
             border: 1px solid var(--border-color);
+            border-radius: 10px; /* Match the image's rounding */
             overflow-y: auto;
             line-height: 1.5; 
             font-size: 0.65em; /* Further reduced font size */
-            margin: 10px 20px 0 20px; /* Added top margin, removed bottom for now */
-            /* Initially hidden, JS will show it */
+            /* Removed margin, as it's now inside room-area */
         }
 
         #action-buttons-container {
@@ -217,6 +257,18 @@
             font-size: 0.7em; /* Further reduced font size */
         }
 
+        #loading-indicator {
+            font-size: 0.8em; /* A bit smaller to fit better */
+            margin-top: 20px;
+            color: var(--accent-color);
+        }
+        
+        button:disabled {
+            background-color: #444;
+            cursor: not-allowed;
+            color: #888;
+        }
+
     </style>
 </head>
 <body>
@@ -225,31 +277,42 @@
         <h1>Welcome Adventurer!</h1>
         <input type="text" id="player-name-input" placeholder="Enter your name (e.g., Veti)">
         <button id="start-game-button">Start Adventure</button>
+        <div id="loading-indicator" class="hidden">Generating your adventure...</div>
     </div>
 
     <div id="game-screen" class="screen hidden">
         <div id="player-stats">
-            <span id="player-name"></span>
-            <span id="player-health"></span>
-            <span id="player-xp"></span>
-            <span id="player-level"></span>
-            <span id="player-coins"></span>
-            <span id="player-kills"></span>
-            <!-- Status Effect Icons -->
-            <span id="player-effect-bleeding" class="hidden" title="You are bleeding!"><span class="emoji">🩸</span></span>
-            <span id="player-effect-cursed" class="hidden" title="You are cursed!"><span class="emoji">🧿</span></span>
+            <div id="primary-stats">
+                <div class="stat-group">
+                    <span id="player-name"></span>
+                    <span id="player-health"></span>
+                </div>
+                <div class="stat-group">
+                    <span id="player-effect-bleeding" class="hidden" title="You are bleeding!"><span class="emoji">🩸</span></span>
+                    <span id="player-effect-cursed" class="hidden" title="You are cursed!"><span class="emoji">🧿</span></span>
+                    <button id="toggle-stats-button" title="Show/Hide Detailed Stats">🔽</button>
+                </div>
+            </div>
+            <div id="secondary-stats" class="hidden">
+                <span id="player-damage"></span>
+                <span id="player-xp"></span>
+                <span id="player-level"></span>
+                <span id="player-coins"></span>
+                <span id="player-kills"></span>
+            </div>
         </div>
 
         <div id="room-area">
             <img id="room-image" src="" alt="Room image" class="hidden">
             <p id="room-image-placeholder">Room Image Area</p>
             
-            <p id="room-description"></p>
-            <div id="story-content" class="hidden"></div>
+            <div id="text-content-wrapper">
+                <p id="room-description"></p>
+                <div id="story-content" class="hidden"></div>
+                <div id="action-result" class="hidden"></div>
+            </div>
         </div>
         
-        <div id="action-result" class="hidden"></div>
-
         <div id="action-buttons-container">
             <div id="action-buttons">
                 <!-- Action buttons will be dynamically added here -->

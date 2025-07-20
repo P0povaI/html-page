@@ -129,7 +129,7 @@ class Enemy:
 
     def attack(self):
         self.effect_type = [self.EFFECTS[self.enemy_class], None]
-        self.effect_chance = [0.5, 0.5]
+        self.effect_chance = [0.2, 0.8]
         return self.damage, random.choices(self.effect_type, self.effect_chance)[0]
     
     def overwrite_enemy_attributes(
@@ -211,9 +211,13 @@ class StrategicRetreatGenerator:
 
 
 class Storyline:
-    def __init__(self, chapters):
+    def __init__(self, chapters=[]):
         self.chapters = chapters
         self.current_chapter = 0
+
+    def update_chapters(self, new_chapters):
+        self.chapters = new_chapters
+        self.current_chapter = 0 # Reset progress
 
     def return_next_chapter(self):
         current = self.current_chapter

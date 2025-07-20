@@ -22,4 +22,4 @@ chapter_five = Chapter(
     chapter_story="At the center of this room sits the Throne of the Abyss, a dark seat of unimaginable power. Here, the dungeon’s true master waits—an ancient, corrupted ruler who has been trapped in this place for centuries. As you approach the throne, his voice booms through the chamber, offering you a deal: bow before him and gain power, or face certain annihilation. But the true cost of his offer is hidden, and your final decision will seal the fate of not just the dungeon, but the entire realm.",
 )
 chapters = [chapter_one, chapter_two, chapter_three, chapter_four, chapter_five]
-story = Storyline(chapters=generate_story())
+story = Storyline()

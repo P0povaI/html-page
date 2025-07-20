@@ -68,3 +68,13 @@ class RoomModel(BaseModel):
 class GameStartModel(BaseModel):
     player: PlayerModel
     room: RoomModel
+
+
+class NextRoomRequest(BaseModel):
+    player: PlayerModel
+
+
+class NextRoomResponse(BaseModel):
+    player: PlayerModel
+    room: RoomModel
+    message: str | None = None
