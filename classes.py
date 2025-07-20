@@ -114,7 +114,7 @@ class Enemy:
             self.RANGES[self.enemy_type]["health"]["min"],
             self.RANGES[self.enemy_type]["health"]["max"],
         )
-        self.experience = (
+        self.experience = int(
             self.health * self.RANGES[self.enemy_type]["experience_multiplier"]
         )
         self.coins = random.randint(
@@ -175,7 +175,7 @@ class Boss:
 class RoomGenerator:
     def __init__(self):
         self.room_types = ["Bedroom", "Chest", "Fight", "Shop", "Casino", "Story"]
-        self.weights = [0.1, 0.1, 0.1, 0.1, 0.1, 0.5]
+        self.weights = [0.1, 0.2, 0.3, 0.1, 0.2, 0.1]
         self.descriptions = {
             "Bedroom": "🛌 You enter a hall resembling an underground inn.\n There is a strange man offering a bed for 5 coins.\n",
             "Chest": "🤔 You entered a room and found a misterious chest. Do you want to open it?",
